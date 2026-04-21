@@ -1,0 +1,35 @@
+name: Bun-Quality-Gate
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  check-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Bun installieren
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Abhängigkeiten installieren
+        # Bun ist bis zu 100x schneller als npm beim Installieren
+        run: bun install
+
+      - name: Sicherheit prüfen (Audit)
+        # Prüft Pakete auf Sicherheitslücken
+        run: bun audit
+
+      - name: TypeScript Validierung
+        # Prüft Typfehler, ohne Dateien zu generieren
+        run: bun x tsc --noEmit
+
+      - name: Tests ausführen
+        # Führt die Vitest-Tests einmalig aus
+        run: bunx vitest run
